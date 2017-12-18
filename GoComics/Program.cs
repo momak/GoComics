@@ -23,7 +23,7 @@ namespace GoComics
             ComicsDb _dbComics = new ComicsDb();
 
             List<Comics> _lstComics = _dbComics.Select(null);
-            DateTime forDay = DateTime.Today;
+            DateTime forDay = DateTime.Today.AddDays(-2);
 
             JobDetailsDB _jobDetailsDb = new JobDetailsDB();
             JobDetails _jobDetails = new JobDetails
@@ -33,7 +33,7 @@ namespace GoComics
             };
             _jobDetailsDb.Insert(_jobDetails);
 
-            foreach (Comics comic in _lstComics)
+            Parallel.ForEach(_lstComics, comic =>
             {
                 Console.WriteLine($"Getting {CreateUrl(comic, forDay)}");
 
@@ -41,7 +41,8 @@ namespace GoComics
                 //Job($"{comic.UrlComic}/{forDay}");
 
                 Console.WriteLine($"Finished {comic.UrlComic}/{forDay}");
-            }
+            });
+            
 
             _jobDetails.EndTime = DateTime.Now;
             _jobDetailsDb.Update(_jobDetails);
@@ -49,30 +50,34 @@ namespace GoComics
 
         private static void GetImagePath(Comics comic, JobDetails jDetails, DateTime forDay)
         {
-            ComicsImg _comicsImg = new ComicsImg();
+            ComicsImg comicsImg = new ComicsImg();
 
-            _comicsImg.JobId = jDetails.JobId;
-            _comicsImg.ComicId = comic.IdComic;
+            comicsImg.JobId = jDetails.JobId;
+            comicsImg.ComicId = comic.IdComic;
 
-            _comicsImg.ForDate = forDay;
+            comicsImg.ForDate = forDay;
             string urlToGet = CreateUrl(comic, forDay);
-            _comicsImg.ComicUrl = urlToGet;
+            comicsImg.ComicUrl = urlToGet;
 
             var task = MakeAsyncRequest(urlToGet, "text/html");
 
             var scrubbedHtml = ScrubbedHtml(task);
 
             Uri link = FetchLinksFromSource(scrubbedHtml);
-            _comicsImg.ImgUrl = link.ToString();
+            comicsImg.ImgUrl = link.ToString();
 
-            _comicsImg.ImagePath = SafeImage(link.ToString());
+            if (!DownloadRemoteImageFile(link.ToString(), comicsImg, out var imagePath))
+            {
+                return;
+            }
+            comicsImg.ImagePath = imagePath;
 
             Console.WriteLine(link.ToString());
 
-            _comicsImg.Visited = DateTime.Now;
+            comicsImg.Visited = DateTime.Now;
 
-            ComicsImgDb _comicsImgDb = new ComicsImgDb();
-            _comicsImgDb.Insert(_comicsImg);
+            ComicsImgDb comicsImgDb = new ComicsImgDb();
+            comicsImgDb.Insert(comicsImg);
         }
 
         private static string ScrubbedHtml(Task<string> task)
@@ -95,16 +100,72 @@ namespace GoComics
             return $"{comic.UrlComic}/{forDate.ToString("yyyy/MM/dd")}";
         }
 
-        public static string SafeImage(string uri)
+        public static string SaveImage(string uri, ComicsImg comicsImg)
         {
-            WebClient webClient = new WebClient();
+            //string imgName = comicsImg.ForDate.ToString("yyyy_MM_dd")+".png";
+            string imgName = comicsImg.ComicId + ".png";
+            string imgLocalPath = GlobalVars.RootFolder + GlobalVars.ComicsFolder + comicsImg.ComicId + "\\" + imgName + ".png";
 
-            string _imgName = uri.Split('/')[uri.Split('/').Length - 1];
-            string _imgPath = Environment.CurrentDirectory + "\\" + _imgName + ".png";
+            using (WebClient webClient = new WebClient())
+            {
+                try
+                {
+                    webClient.DownloadFileAsync(new Uri(uri), imgName);
+                }
+                catch
+                {
+                    return String.Empty;
+                }
 
-            webClient.DownloadFileAsync(new Uri(uri), _imgPath);
+            }
 
-            return _imgPath;
+            return imgLocalPath;
+        }
+
+        private static bool DownloadRemoteImageFile(string uri, ComicsImg comicsImg, out string imgLocalPath)
+        {
+            string imgName = comicsImg.ForDate.ToString("yyyy_MM_dd")+".png";
+            utils.CreateFolder(GlobalVars.RootFolder + GlobalVars.ComicsFolder + comicsImg.ComicId);
+
+            imgLocalPath = GlobalVars.RootFolder + GlobalVars.ComicsFolder + comicsImg.ComicId + "\\" + imgName;
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+            HttpWebResponse response;
+            try
+            {
+                response = (HttpWebResponse)request.GetResponse();
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            // Check that the remote file was found. The ContentType
+            // check is performed since a request for a non-existent
+            // image file might be redirected to a 404-page, which would
+            // yield the StatusCode "OK", even though the image was not
+            // found.
+            if ((response.StatusCode == HttpStatusCode.OK ||
+                 response.StatusCode == HttpStatusCode.Moved ||
+                 response.StatusCode == HttpStatusCode.Redirect) &&
+                response.ContentType.StartsWith("image", StringComparison.OrdinalIgnoreCase))
+            {
+
+                // if the remote file was found, download it
+                using (Stream inputStream = response.GetResponseStream())
+                using (Stream outputStream = File.OpenWrite(imgLocalPath))
+                {
+                    byte[] buffer = new byte[4096];
+                    int bytesRead;
+                    do
+                    {
+                        bytesRead = inputStream.Read(buffer, 0, buffer.Length);
+                        outputStream.Write(buffer, 0, bytesRead);
+                    } while (bytesRead != 0);
+                }
+                return true;
+            }
+            return false;
         }
 
         public static Uri FetchLinksFromSource(string htmlSource)

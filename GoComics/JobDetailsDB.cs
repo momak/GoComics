@@ -122,10 +122,10 @@ namespace GoComics
                             CommandText = JobDetailsQueries.UpdateJob.ToString(),
                             CommandType = CommandType.StoredProcedure
                         };
-
-                        cmd.Parameters.AddWithValue("@jobId", jobDetails.JobId);
-                        cmd.Parameters.AddWithValue("@startTime", jobDetails.StartTime);
-                        cmd.Parameters.AddWithValue("@endTime", jobDetails.EndTime);
+                        
+                        cmd.Parameters.AddWithValue("jId", jobDetails.JobId);
+                        cmd.Parameters.AddWithValue("startD", jobDetails.StartTime);
+                        cmd.Parameters.AddWithValue("endD", jobDetails.EndTime);
 
                         //Execute command
                         return cmd.ExecuteNonQuery() > 0;
