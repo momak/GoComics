@@ -5,13 +5,13 @@ using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GoComics
+namespace GoComics.Models
 {
     class Comics
     {
         private int _idComic;
         private string _urlComic;
-        private string _name;
+        private string _title;
         private string _description;
 
         public int IdComic
@@ -26,10 +26,10 @@ namespace GoComics
             set { _urlComic = value; }
         }
 
-        public string Name
+        public string Title
         {
-            get { return _name; }
-            set { _name = value; }
+            get { return _title; }
+            set { _title = value; }
         }
 
         public string Description
@@ -42,18 +42,18 @@ namespace GoComics
         {
         }
 
-        public Comics(int idComic, string urlComic, string name, string description)
+        public Comics(int idComic, string urlComic, string title, string description)
         {
             IdComic = idComic;
             UrlComic = urlComic;
-            Name = name;
+            Title = title;
             Description = description;
 
         }
 
         public override string ToString()
         {
-            return $"{IdComic}, {UrlComic}, {Name}, {Description}";
+            return $"{IdComic}, {UrlComic}, {Title}, {Description}";
         }
     }
 }

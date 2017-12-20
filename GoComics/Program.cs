@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using GoComics.DAL;
+using GoComics.Models;
 
 namespace GoComics
 {
@@ -20,18 +19,18 @@ namespace GoComics
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
 
-            ComicsDb _dbComics = new ComicsDb();
+            ComicsManager _dbComics = new ComicsManager();
 
             List<Comics> _lstComics = _dbComics.Select(null);
             DateTime forDay = DateTime.Today.AddDays(-2);
-
-            JobDetailsDB _jobDetailsDb = new JobDetailsDB();
+            
+            JobDetailsManager _jobManager = new JobDetailsManager();
             JobDetails _jobDetails = new JobDetails
             {
                 JobId = Guid.NewGuid(),
                 StartTime = DateTime.Now
             };
-            _jobDetailsDb.Insert(_jobDetails);
+            _jobManager.Insert(_jobDetails);
 
             Parallel.ForEach(_lstComics, comic =>
             {
@@ -45,7 +44,7 @@ namespace GoComics
             
 
             _jobDetails.EndTime = DateTime.Now;
-            _jobDetailsDb.Update(_jobDetails);
+            _jobManager.Update(_jobDetails);
         }
 
         private static void GetImagePath(Comics comic, JobDetails jDetails, DateTime forDay)
@@ -76,8 +75,8 @@ namespace GoComics
 
             comicsImg.Visited = DateTime.Now;
 
-            ComicsImgDb comicsImgDb = new ComicsImgDb();
-            comicsImgDb.Insert(comicsImg);
+            ComicsImgManager comicsImgManager = new ComicsImgManager();
+            comicsImgManager.Insert(comicsImg);
         }
 
         private static string ScrubbedHtml(Task<string> task)

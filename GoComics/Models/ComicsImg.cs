@@ -6,7 +6,7 @@ using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GoComics
+namespace GoComics.Models
 {
     class ComicsImg
     {
