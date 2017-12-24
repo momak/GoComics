@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DAL\ComicJobManager.cs" />
     <Compile Include="Models\Comics.cs" />
     <Compile Include="DAL\ComicsManager.cs" />
     <Compile Include="Models\ComicsImg.cs" />
@@ -54,6 +55,7 @@
     <Compile Include="DAL\MySqlDatabase.cs" />
     <Compile Include="DBconnect.cs" />
     <Compile Include="GlobalVars.cs" />
+    <Compile Include="Models\ComicsJob.cs" />
     <Compile Include="Models\JobDetails.cs" />
     <Compile Include="DAL\JobDetailsManager.cs" />
     <Compile Include="Program.cs" />

@@ -19,11 +19,19 @@ namespace GoComics
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
 
-            ComicsManager _dbComics = new ComicsManager();
+            //set start day
+            DateTime forDay = DateTime.Today.AddDays(-24);
+            var listOfDays = new List<DateTime>();
 
-            List<Comics> _lstComics = _dbComics.Select(null);
-            DateTime forDay = DateTime.Today.AddDays(-2);
-            
+            for (var day = forDay; day <= DateTime.Today; day = day.AddDays(1))
+            {
+                listOfDays.Add(day);
+            }
+
+
+            ComicJobManager _comicJob = new ComicJobManager();
+            List<ComicsJob> _lstComics = _comicJob.Select(forDay);
+
             JobDetailsManager _jobManager = new JobDetailsManager();
             JobDetails _jobDetails = new JobDetails
             {
@@ -32,23 +40,30 @@ namespace GoComics
             };
             _jobManager.Insert(_jobDetails);
 
-            Parallel.ForEach(_lstComics, comic =>
+
+            Parallel.ForEach(listOfDays, comicDay =>
             {
-                Console.WriteLine($"Getting {CreateUrl(comic, forDay)}");
+                Parallel.ForEach(_lstComics, comic =>
+                {
+                    if (!comic.Has)
+                    {
+                        Console.WriteLine($"Getting {CreateUrl(comic, comicDay)}");
 
-                GetImagePath(comic, _jobDetails, forDay);
-                //Job($"{comic.UrlComic}/{forDay}");
+                        GetImagePath(comic, _jobDetails, forDay);
+                        //Job($"{comic.UrlComic}/{forDay}");
 
-                Console.WriteLine($"Finished {comic.UrlComic}/{forDay}");
+                        Console.WriteLine($"Finished {comic.UrlComic}/{comicDay:yyyy/MM/dd}");
+                    }
+                });
             });
             
-
             _jobDetails.EndTime = DateTime.Now;
             _jobManager.Update(_jobDetails);
         }
 
         private static void GetImagePath(Comics comic, JobDetails jDetails, DateTime forDay)
         {
+            ComicsImgManager comicsImgManager = new ComicsImgManager();
             ComicsImg comicsImg = new ComicsImg();
 
             comicsImg.JobId = jDetails.JobId;
@@ -65,25 +80,25 @@ namespace GoComics
             Uri link = FetchLinksFromSource(scrubbedHtml);
             comicsImg.ImgUrl = link.ToString();
 
-            if (!DownloadRemoteImageFile(link.ToString(), comicsImg, out var imagePath))
-            {
-                return;
+            if (comicsImgManager.CheckImageUrl(comicsImg.ImgUrl))
+            {//not duplicate image
+                if (!DownloadRemoteImageFile(link.ToString(), comicsImg, out var imagePath))
+                {//unsuccesfull download
+                    return;
+                }
+                comicsImg.ImagePath = imagePath;
+                Console.WriteLine(link.ToString());
+
+                comicsImg.Visited = DateTime.Now;
+                comicsImgManager.Insert(comicsImg);
             }
-            comicsImg.ImagePath = imagePath;
-
-            Console.WriteLine(link.ToString());
-
-            comicsImg.Visited = DateTime.Now;
-
-            ComicsImgManager comicsImgManager = new ComicsImgManager();
-            comicsImgManager.Insert(comicsImg);
         }
 
         private static string ScrubbedHtml(Task<string> task)
         {
             string htmlContent = task.Result;
-            int startIndex = htmlContent.IndexOf("<div class=\"comic__image js-comic-swipe");
-            int endIndex = htmlContent.IndexOf("<div class=\'comic__nav\'>");
+            int startIndex = htmlContent.IndexOf("<div class='comic__container'>");
+            int endIndex = htmlContent.IndexOf("<div class='comic__nav'>");
             int _len = endIndex - startIndex;
             string scrubbedHtml = task.Result.Substring(startIndex, _len);
 
@@ -123,7 +138,7 @@ namespace GoComics
 
         private static bool DownloadRemoteImageFile(string uri, ComicsImg comicsImg, out string imgLocalPath)
         {
-            string imgName = comicsImg.ForDate.ToString("yyyy_MM_dd")+".png";
+            string imgName = comicsImg.ForDate.ToString("yyyy_MM_dd") + ".png";
             utils.CreateFolder(GlobalVars.RootFolder + GlobalVars.ComicsFolder + comicsImg.ComicId);
 
             imgLocalPath = GlobalVars.RootFolder + GlobalVars.ComicsFolder + comicsImg.ComicId + "\\" + imgName;
