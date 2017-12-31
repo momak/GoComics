@@ -20,7 +20,7 @@ namespace GoComics
             Thread.CurrentThread.CurrentUICulture = culture;
 
             //set start day
-            DateTime forDay = DateTime.Today.AddDays(-30);
+            DateTime forDay = DateTime.Today.AddDays(-51);
             var listOfDays = new List<DateTime>();
 
             for (var day = forDay; day <= DateTime.Today; day = day.AddDays(1))
@@ -45,15 +45,18 @@ namespace GoComics
                 {
                     if (!comic.Has)
                     {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine($"Getting {CreateUrl(comic, comicDay)}");
 
                         GetImagePath(comic, _jobDetails, comicDay);
 
+                        Console.ForegroundColor = ConsoleColor.Magenta;
                         Console.WriteLine($"Finished {comic.UrlComic}/{comicDay:yyyy/MM/dd}");
                     }
                 });
             });
 
+            Console.ResetColor();
             _jobDetails.EndTime = DateTime.Now;
             _jobManager.Update(_jobDetails);
         }
@@ -79,13 +82,16 @@ namespace GoComics
 
             if (!comicsImgManager.CheckImageUrl(comicsImg.ImgUrl))
             {//not duplicate image
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
                 Console.WriteLine($"New Image {comic.UrlComic}/{forDay:yyyy/MM/dd} : {comicsImg.ImgUrl}");
                 if (!DownloadRemoteImageFile(link.ToString(), comicsImg, out var imagePath))
                 {//unsuccesfull download
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Faild download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
                     return;
                 }
                 comicsImg.ImagePath = imagePath;
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
                 Console.WriteLine($"Successfull download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
 
                 comicsImg.Visited = DateTime.Now;
