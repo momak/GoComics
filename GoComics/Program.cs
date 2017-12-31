@@ -20,7 +20,7 @@ namespace GoComics
             Thread.CurrentThread.CurrentUICulture = culture;
 
             //set start day
-            DateTime forDay = DateTime.Today.AddDays(-24);
+            DateTime forDay = DateTime.Today.AddDays(-30);
             var listOfDays = new List<DateTime>();
 
             for (var day = forDay; day <= DateTime.Today; day = day.AddDays(1))
@@ -28,10 +28,7 @@ namespace GoComics
                 listOfDays.Add(day);
             }
 
-
             ComicJobManager _comicJob = new ComicJobManager();
-            List<ComicsJob> _lstComics = _comicJob.Select(forDay);
-
             JobDetailsManager _jobManager = new JobDetailsManager();
             JobDetails _jobDetails = new JobDetails
             {
@@ -39,24 +36,24 @@ namespace GoComics
                 StartTime = DateTime.Now
             };
             _jobManager.Insert(_jobDetails);
-
-
+            
             Parallel.ForEach(listOfDays, comicDay =>
             {
-                Parallel.ForEach(_lstComics, comic =>
+                var lstComics = _comicJob.Select(comicDay);
+
+                Parallel.ForEach(lstComics, comic =>
                 {
                     if (!comic.Has)
                     {
                         Console.WriteLine($"Getting {CreateUrl(comic, comicDay)}");
 
-                        GetImagePath(comic, _jobDetails, forDay);
-                        //Job($"{comic.UrlComic}/{forDay}");
+                        GetImagePath(comic, _jobDetails, comicDay);
 
                         Console.WriteLine($"Finished {comic.UrlComic}/{comicDay:yyyy/MM/dd}");
                     }
                 });
             });
-            
+
             _jobDetails.EndTime = DateTime.Now;
             _jobManager.Update(_jobDetails);
         }
@@ -80,14 +77,16 @@ namespace GoComics
             Uri link = FetchLinksFromSource(scrubbedHtml);
             comicsImg.ImgUrl = link.ToString();
 
-            if (comicsImgManager.CheckImageUrl(comicsImg.ImgUrl))
+            if (!comicsImgManager.CheckImageUrl(comicsImg.ImgUrl))
             {//not duplicate image
+                Console.WriteLine($"New Image {comic.UrlComic}/{forDay:yyyy/MM/dd} : {comicsImg.ImgUrl}");
                 if (!DownloadRemoteImageFile(link.ToString(), comicsImg, out var imagePath))
                 {//unsuccesfull download
+                    Console.WriteLine($"Faild download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
                     return;
                 }
                 comicsImg.ImagePath = imagePath;
-                Console.WriteLine(link.ToString());
+                Console.WriteLine($"Successfull download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
 
                 comicsImg.Visited = DateTime.Now;
                 comicsImgManager.Insert(comicsImg);

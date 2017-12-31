@@ -73,7 +73,7 @@ namespace GoComics.DAL
                 using (IDbConnection dbConnect = database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(ComicsImgSP.SelectComicsImgs.ToString(), dbConnect))
+                        database.CreateStoredProcCommand(ComicsImgSP.GetImageUrl.ToString(), dbConnect))
                     {
                         command.Parameters.Add(database.CreateParameter("ImgU", imageUrl));
 

@@ -99,7 +99,8 @@ namespace GoComics.DAL
                         command.Parameters.Add(database.CreateParameter("@StartD", jobDetails.StartTime));
                         command.Parameters.Add(database.CreateParameter("@EndD", jobDetails.EndTime));
 
-                        retVal = (command.ExecuteNonQuery() > 0);
+                        command.ExecuteNonQuery();
+                        retVal = true;
                     }
                     dbConnect.Close();
                 }
@@ -107,6 +108,7 @@ namespace GoComics.DAL
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                retVal = false;
             }
             return retVal;
         }
