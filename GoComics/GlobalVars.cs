@@ -13,6 +13,6 @@ namespace GoComics
         public static string DefaultCulture => ConfigurationManager.AppSettings["DefaultCulture"];
         public static string RootFolder => ConfigurationManager.AppSettings["rootFolder"];
         public static string ComicsFolder => ConfigurationManager.AppSettings["comicsFolder"];
-        
+        public static int DaysBefore => Convert.ToInt32(ConfigurationManager.AppSettings["getDaysBefore"]);
     }
 }

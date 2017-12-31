@@ -20,7 +20,7 @@ namespace GoComics
             Thread.CurrentThread.CurrentUICulture = culture;
 
             //set start day
-            DateTime forDay = DateTime.Today.AddDays(-51);
+            DateTime forDay = DateTime.Today.AddDays(-GlobalVars.DaysBefore);
             var listOfDays = new List<DateTime>();
 
             for (var day = forDay; day <= DateTime.Today; day = day.AddDays(1))
