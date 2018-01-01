@@ -47,7 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleWrite.cs" />
     <Compile Include="DAL\ComicJobManager.cs" />
+    <Compile Include="ILog.cs" />
+    <Compile Include="LogMode.cs" />
     <Compile Include="Models\Comics.cs" />
     <Compile Include="DAL\ComicsManager.cs" />
     <Compile Include="Models\ComicsImg.cs" />

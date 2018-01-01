@@ -13,6 +13,9 @@ namespace GoComics
 {
     class Program
     {
+        private static ConsoleWrite _cWrite;
+        private static string _outputFile;
+
         static void Main(string[] args)
         {
             CultureInfo culture = new CultureInfo(GlobalVars.DefaultCulture);
@@ -36,29 +39,45 @@ namespace GoComics
                 StartTime = DateTime.Now
             };
             _jobManager.Insert(_jobDetails);
-            
+
+            CreateLocation(GlobalVars.RootFolder + GlobalVars.ComicsFolder + _jobDetails.JobId);
+            _cWrite = new ConsoleWrite(LogMode.Both, LogDetail.Information, _outputFile, _jobDetails);
+
+            _cWrite.Ldetail = LogDetail.Information;
+            _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Calculated {listOfDays.Count} Days");
+
             Parallel.ForEach(listOfDays, comicDay =>
             {
                 var lstComics = _comicJob.Select(comicDay);
 
+                _cWrite.Ldetail = LogDetail.Information;
+                _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Found {lstComics.Count } comics for {comicDay:dd.MM.yyyy}");
+
                 Parallel.ForEach(lstComics, comic =>
                 {
+                    _cWrite.Ldetail = LogDetail.Information;
+                    _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Starting {comic} on day {comicDay}");
+
                     if (!comic.Has)
                     {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine($"Getting {CreateUrl(comic, comicDay)}");
+                        _cWrite.Ldetail = LogDetail.Information;
+                        _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Getting {CreateUrl(comic, comicDay)}");
 
                         GetImagePath(comic, _jobDetails, comicDay);
 
-                        Console.ForegroundColor = ConsoleColor.Magenta;
-                        Console.WriteLine($"Finished {comic.UrlComic}/{comicDay:yyyy/MM/dd}");
+                        _cWrite.Ldetail = LogDetail.Success;
+                        _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Finished {comic.UrlComic}/{comicDay:dd.MM.yyyy}");
                     }
+
+                    _cWrite.Ldetail = LogDetail.Success;
+                    _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Ending {comic} on day {comicDay}");
                 });
             });
-
-            Console.ResetColor();
+            
             _jobDetails.EndTime = DateTime.Now;
             _jobManager.Update(_jobDetails);
+
+            _cWrite.Dispose();
         }
 
         private static void GetImagePath(Comics comic, JobDetails jDetails, DateTime forDay)
@@ -82,17 +101,17 @@ namespace GoComics
 
             if (!comicsImgManager.CheckImageUrl(comicsImg.ImgUrl))
             {//not duplicate image
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.WriteLine($"New Image {comic.UrlComic}/{forDay:yyyy/MM/dd} : {comicsImg.ImgUrl}");
+                _cWrite.Ldetail = LogDetail.Success;
+                _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - New Image {comic.UrlComic}/{forDay:yyyy/MM/dd} : {comicsImg.ImgUrl}");
                 if (!DownloadRemoteImageFile(link.ToString(), comicsImg, out var imagePath))
                 {//unsuccesfull download
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Faild download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
+                    _cWrite.Ldetail = LogDetail.Error;
+                    _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Failed download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
                     return;
                 }
                 comicsImg.ImagePath = imagePath;
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.WriteLine($"Successfull download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
+                _cWrite.Ldetail = LogDetail.Success;
+                _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Successfull download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
 
                 comicsImg.Visited = DateTime.Now;
                 comicsImgManager.Insert(comicsImg);
@@ -202,18 +221,28 @@ namespace GoComics
         // Define other methods and classes here
         public static Task<string> MakeAsyncRequest(string url, string contentType)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.ContentType = contentType;
-            request.Method = WebRequestMethods.Http.Get;
-            request.Timeout = 20000;
-            request.Proxy = null;
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                request.ContentType = contentType;
+                request.Method = WebRequestMethods.Http.Get;
+                request.Timeout = 20000;
+                request.Proxy = null;
 
-            Task<WebResponse> task = Task.Factory.FromAsync(
-                request.BeginGetResponse,
-                asyncResult => request.EndGetResponse(asyncResult),
-                (object)null);
+                Task<WebResponse> task = Task.Factory.FromAsync(
+                    request.BeginGetResponse,
+                    asyncResult => request.EndGetResponse(asyncResult),
+                    (object)null);
 
-            return task.ContinueWith(t => ReadStreamFromResponse(t.Result));
+                return task.ContinueWith(t => ReadStreamFromResponse(t.Result));
+            }
+            catch (Exception e)
+            {
+                _cWrite.Ldetail = LogDetail.Error;
+                _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - {e.Message}");
+                return null;
+            }
+            
         }
 
         private static string ReadStreamFromResponse(WebResponse response)
@@ -224,6 +253,24 @@ namespace GoComics
                 //Need to return this response 
                 string strContent = sr.ReadToEnd();
                 return strContent;
+            }
+        }
+
+        private static void CreateLocation(string pathToFolder)
+        {
+            if (!string.IsNullOrWhiteSpace(pathToFolder))
+            {
+                //if (!Directory.Exists(pathToFolder))
+                //    Directory.CreateDirectory(pathToFolder);
+
+                _outputFile = pathToFolder + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm") + ".txt";
+
+                if (File.Exists(_outputFile))
+                    File.Delete(_outputFile);
+            }
+            else
+            {
+                throw new Exception("Cannot create output directory/file!");
             }
         }
     }
