@@ -40,10 +40,9 @@ namespace GoComics
             };
             _jobManager.Insert(_jobDetails);
 
-            CreateLocation(GlobalVars.RootFolder + GlobalVars.ComicsFolder + _jobDetails.JobId);
+           _outputFile= utils.CreateFile(GlobalVars.RootFolder + GlobalVars.ComicsFolder + _jobDetails.JobId);
             _cWrite = new ConsoleWrite(LogMode.Both, LogDetail.Information, _outputFile, _jobDetails);
 
-            _cWrite.Ldetail = LogDetail.Information;
             _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Calculated {listOfDays.Count} Days");
 
             Parallel.ForEach(listOfDays, comicDay =>
@@ -101,20 +100,24 @@ namespace GoComics
 
             if (!comicsImgManager.CheckImageUrl(comicsImg.ImgUrl))
             {//not duplicate image
-                _cWrite.Ldetail = LogDetail.Success;
-                _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - New Image {comic.UrlComic}/{forDay:yyyy/MM/dd} : {comicsImg.ImgUrl}");
-                if (!DownloadRemoteImageFile(link.ToString(), comicsImg, out var imagePath))
-                {//unsuccesfull download
-                    _cWrite.Ldetail = LogDetail.Error;
-                    _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Failed download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
-                    return;
-                }
-                comicsImg.ImagePath = imagePath;
-                _cWrite.Ldetail = LogDetail.Success;
-                _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Successfull download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
 
-                comicsImg.Visited = DateTime.Now;
-                comicsImgManager.Insert(comicsImg);
+                lock (comicsImg)
+                {
+                    _cWrite.Ldetail = LogDetail.Success;
+                    _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - New Image {comic.UrlComic}/{forDay:yyyy/MM/dd} : {comicsImg.ImgUrl}");
+                    if (!DownloadRemoteImageFile(link.ToString(), comicsImg, out var imagePath))
+                    {//unsuccesfull download
+                        _cWrite.Ldetail = LogDetail.Error;
+                        _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Failed download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
+                        return;
+                    }
+                    comicsImg.ImagePath = imagePath;
+                    _cWrite.Ldetail = LogDetail.Success;
+                    _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Successfull download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
+
+                    comicsImg.Visited = DateTime.Now;
+                    comicsImgManager.Insert(comicsImg);
+                }
             }
         }
 
@@ -255,23 +258,6 @@ namespace GoComics
                 return strContent;
             }
         }
-
-        private static void CreateLocation(string pathToFolder)
-        {
-            if (!string.IsNullOrWhiteSpace(pathToFolder))
-            {
-                //if (!Directory.Exists(pathToFolder))
-                //    Directory.CreateDirectory(pathToFolder);
-
-                _outputFile = pathToFolder + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm") + ".txt";
-
-                if (File.Exists(_outputFile))
-                    File.Delete(_outputFile);
-            }
-            else
-            {
-                throw new Exception("Cannot create output directory/file!");
-            }
-        }
+       
     }
 }

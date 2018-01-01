@@ -27,6 +27,10 @@ namespace GoComics
             set => _ld = value;
         }
 
+        public ConsoleWrite()
+        {
+        }
+
         public ConsoleWrite(LogMode lm, LogDetail ld, string outputFile)
         {
             _lm = lm;

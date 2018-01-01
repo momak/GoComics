@@ -21,5 +21,21 @@ namespace GoComics
             return false;
         }
 
-       }
+        public static string CreateFile(string pathToFile)
+        {
+            if (!string.IsNullOrWhiteSpace(pathToFile))
+            {
+
+                string outputFile = pathToFile + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm") + ".txt";
+
+                if (File.Exists(outputFile))
+                    File.Delete(outputFile);
+
+                return outputFile;
+            }
+
+            throw new Exception("Cannot create output directory/file!");
+        }
+
+    }
 }
