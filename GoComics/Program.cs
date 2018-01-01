@@ -73,7 +73,7 @@ namespace GoComics
                     _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Ending {comic} on day {comicDay}");
                 });
             });
-            
+
             _jobDetails.EndTime = DateTime.Now;
             _jobManager.Update(_jobDetails);
 
@@ -242,7 +242,7 @@ namespace GoComics
                 _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - {e.Message}");
                 return null;
             }
-            
+
         }
 
         private static string ReadStreamFromResponse(WebResponse response)
