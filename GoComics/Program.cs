@@ -23,10 +23,11 @@ namespace GoComics
             Thread.CurrentThread.CurrentUICulture = culture;
 
             //set start day
-            DateTime forDay = DateTime.Today.AddDays(-GlobalVars.DaysBefore);
+            DateTime startDay = DateTime.Today.AddDays(GlobalVars.StartDayOffest);
+            DateTime endDay = startDay.AddDays(-GlobalVars.DaysBefore);
             var listOfDays = new List<DateTime>();
 
-            for (var day = forDay; day <= DateTime.Today; day = day.AddDays(1))
+            for (var day = endDay; day <= startDay; day = day.AddDays(1))
             {
                 listOfDays.Add(day);
             }
