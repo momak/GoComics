@@ -31,7 +31,7 @@ namespace GoComics
             Thread.CurrentThread.CurrentUICulture = culture;
 
             //set start day
-            DateTime startDay = DateTime.Today.AddDays(_commandLineOptions.StartDayOffest);
+            DateTime startDay = DateTime.Today.AddDays(-_commandLineOptions.StartDayOffest);
             DateTime endDay = startDay.AddDays(-_commandLineOptions.DaysBefore);
             var listOfDays = new List<DateTime>();
 
