@@ -132,6 +132,11 @@ namespace GoComics
                         Console.ForegroundColor = ConsoleColor.Red;
                         break;
                     }
+                case LogDetail.Debug:
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    break;
+                }
                 case LogDetail.Success:
                     {
                         Console.ForegroundColor = ConsoleColor.Green;

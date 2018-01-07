@@ -18,6 +18,7 @@ namespace GoComics
         None, 
         Information,
         Error,
-        Success
+        Success,
+        Debug
     }
 }

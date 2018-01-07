@@ -13,18 +13,26 @@ namespace GoComics
 {
     class Program
     {
+        private static CommandLineOptions _commandLineOptions;
+
         private static ConsoleWrite _cWrite;
         private static string _outputFile;
 
         static void Main(string[] args)
         {
-            CultureInfo culture = new CultureInfo(GlobalVars.DefaultCulture);
+            var commandLineParser = CommandLineOptions.Setup();
+            var result = commandLineParser.Parse(args);
+            if (CommandLineOptions.HandleStandardResult(result))
+                return;
+            _commandLineOptions = commandLineParser.Object;
+            
+            CultureInfo culture = new CultureInfo(_commandLineOptions.DefaultCulture);
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
 
             //set start day
-            DateTime startDay = DateTime.Today.AddDays(GlobalVars.StartDayOffest);
-            DateTime endDay = startDay.AddDays(-GlobalVars.DaysBefore);
+            DateTime startDay = DateTime.Today.AddDays(_commandLineOptions.StartDayOffest);
+            DateTime endDay = startDay.AddDays(-_commandLineOptions.DaysBefore);
             var listOfDays = new List<DateTime>();
 
             for (var day = endDay; day <= startDay; day = day.AddDays(1))
@@ -44,33 +52,33 @@ namespace GoComics
            _outputFile= utils.CreateFile(GlobalVars.RootFolder + GlobalVars.ComicsFolder + _jobDetails.JobId);
             _cWrite = new ConsoleWrite(LogMode.Both, LogDetail.Information, _outputFile, _jobDetails);
 
-            _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Calculated {listOfDays.Count} Days");
+            _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - Calculated {listOfDays.Count} Days");
 
             Parallel.ForEach(listOfDays, comicDay =>
             {
                 var lstComics = _comicJob.Select(comicDay);
 
                 _cWrite.Ldetail = LogDetail.Information;
-                _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Found {lstComics.Count } comics for {comicDay:dd.MM.yyyy}");
+                _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - Found {lstComics.Count } comics for {comicDay:dd.MM.yyyy}");
 
                 Parallel.ForEach(lstComics, comic =>
                 {
                     _cWrite.Ldetail = LogDetail.Information;
-                    _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Starting {comic} on day {comicDay}");
+                    _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - Starting {comic} on day {comicDay}");
 
                     if (!comic.Has)
                     {
-                        _cWrite.Ldetail = LogDetail.Information;
-                        _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Getting {CreateUrl(comic, comicDay)}");
+                        _cWrite.Ldetail = LogDetail.Debug;
+                        _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - Getting {CreateUrl(comic, comicDay)}");
 
                         GetImagePath(comic, _jobDetails, comicDay);
 
-                        _cWrite.Ldetail = LogDetail.Success;
-                        _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Finished {comic.UrlComic}/{comicDay:dd.MM.yyyy}");
+                        _cWrite.Ldetail = LogDetail.Information;
+                        _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - Finished {comic.UrlComic}/{comicDay:dd.MM.yyyy}");
                     }
 
                     _cWrite.Ldetail = LogDetail.Success;
-                    _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Ending {comic} on day {comicDay}");
+                    _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - Ending {comic} on day {comicDay}");
                 });
             });
 
@@ -105,16 +113,16 @@ namespace GoComics
                 lock (comicsImg)
                 {
                     _cWrite.Ldetail = LogDetail.Success;
-                    _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - New Image {comic.UrlComic}/{forDay:yyyy/MM/dd} : {comicsImg.ImgUrl}");
+                    _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - New Image {comic.UrlComic}/{forDay:yyyy/MM/dd} : {comicsImg.ImgUrl}");
                     if (!DownloadRemoteImageFile(link.ToString(), comicsImg, out var imagePath))
                     {//unsuccesfull download
                         _cWrite.Ldetail = LogDetail.Error;
-                        _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Failed download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
+                        _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - Failed download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
                         return;
                     }
                     comicsImg.ImagePath = imagePath;
                     _cWrite.Ldetail = LogDetail.Success;
-                    _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - Successfull download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
+                    _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - Successfull download of {comic.UrlComic}/{forDay:yyyy/MM/dd}");
 
                     comicsImg.Visited = DateTime.Now;
                     comicsImgManager.Insert(comicsImg);
@@ -243,7 +251,7 @@ namespace GoComics
             catch (Exception e)
             {
                 _cWrite.Ldetail = LogDetail.Error;
-                _cWrite.WriteLine($"DT: {DateTime.Now:hh:mm:ss} - {e.Message}");
+                _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - {e.Message}");
                 return null;
             }
 

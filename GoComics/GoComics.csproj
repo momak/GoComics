@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FluentCommandLineParser, Version=1.4.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentCommandLineParser.1.4.3\lib\net35\FluentCommandLineParser.dll</HintPath>
+    </Reference>
     <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\MySql.Data.dll</HintPath>
@@ -47,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandLineOptions.cs" />
     <Compile Include="ConsoleWrite.cs" />
     <Compile Include="DAL\ComicJobManager.cs" />
     <Compile Include="ILog.cs" />
@@ -67,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DatabaseFactory\DatabaseFactory.csproj">
