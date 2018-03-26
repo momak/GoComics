@@ -25,7 +25,7 @@ namespace GoComics
             if (CommandLineOptions.HandleStandardResult(result))
                 return;
             _commandLineOptions = commandLineParser.Object;
-            
+
             CultureInfo culture = new CultureInfo(_commandLineOptions.DefaultCulture);
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
@@ -49,19 +49,24 @@ namespace GoComics
             };
             _jobManager.Insert(_jobDetails);
 
-           _outputFile= utils.CreateFile(GlobalVars.RootFolder + GlobalVars.ComicsFolder + _jobDetails.JobId);
+            _outputFile = utils.CreateFile(GlobalVars.RootFolder + GlobalVars.ComicsFolder + _jobDetails.JobId);
             _cWrite = new ConsoleWrite(LogMode.Both, LogDetail.Information, _outputFile, _jobDetails);
 
             _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - Calculated {listOfDays.Count} Days");
 
-            Parallel.ForEach(listOfDays, comicDay =>
+            ParallelOptions parallelOptions = new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = 10
+            };
+
+            Parallel.ForEach(listOfDays, parallelOptions, comicDay =>
             {
                 var lstComics = _comicJob.Select(comicDay);
 
                 _cWrite.Ldetail = LogDetail.Information;
                 _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - Found {lstComics.Count } comics for {comicDay:dd.MM.yyyy}");
 
-                Parallel.ForEach(lstComics, comic =>
+                Parallel.ForEach(lstComics, parallelOptions, comic =>
                 {
                     _cWrite.Ldetail = LogDetail.Information;
                     _cWrite.WriteLine($"DT: {DateTime.Now:HH:mm:ss} - Starting {comic} on day {comicDay}");
@@ -133,15 +138,20 @@ namespace GoComics
         private static string ScrubbedHtml(Task<string> task)
         {
             string htmlContent = task.Result;
-            int startIndex = htmlContent.IndexOf("<div class='comic__container'>");
-            int endIndex = htmlContent.IndexOf("<div class='comic__nav'>");
+            //int startIndex = htmlContent.IndexOf("<div class='comic__container'>");
+            //int endIndex = htmlContent.IndexOf("<div class='comic__nav'>");
+
+
+            int startIndex = htmlContent.IndexOf("<picture class=\"item-comic-image\">");
+            int endIndex = htmlContent.IndexOf("</picture>", startIndex);
+
             int _len = endIndex - startIndex;
             string scrubbedHtml = task.Result.Substring(startIndex, _len);
 
-            startIndex = scrubbedHtml.IndexOf("<a");
-            endIndex = scrubbedHtml.IndexOf("</a>");
-            _len = endIndex - startIndex;
-            scrubbedHtml = scrubbedHtml.Substring(startIndex, _len);
+            //startIndex = scrubbedHtml.IndexOf("<a");
+            //endIndex = scrubbedHtml.IndexOf("</a>");
+            //_len = endIndex - startIndex;
+            //scrubbedHtml = scrubbedHtml.Substring(startIndex, _len);
             return scrubbedHtml;
         }
 
@@ -267,6 +277,6 @@ namespace GoComics
                 return strContent;
             }
         }
-       
+
     }
 }
