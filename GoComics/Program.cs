@@ -56,7 +56,7 @@ namespace GoComics
 
             ParallelOptions parallelOptions = new ParallelOptions()
             {
-                MaxDegreeOfParallelism = 10
+                MaxDegreeOfParallelism = 12
             };
 
             Parallel.ForEach(listOfDays, parallelOptions, comicDay =>
