@@ -56,7 +56,7 @@ namespace GoComics
 
             ParallelOptions parallelOptions = new ParallelOptions()
             {
-                MaxDegreeOfParallelism = 6
+                MaxDegreeOfParallelism = 10
             };
 
             Parallel.ForEach(listOfDays, parallelOptions, comicDay =>
@@ -110,9 +110,10 @@ namespace GoComics
             var scrubbedHtml = ScrubbedHtml(task);
 
             Uri link = FetchLinksFromSource(scrubbedHtml);
-            comicsImg.ImgUrl = link.ToString();
+            comicsImg.ImgUrl = link == null ? String.Empty : link.ToString();
 
-            if (!comicsImgManager.CheckImageUrl(comicsImg.ImgUrl))
+
+            if (!String.IsNullOrEmpty(comicsImg.ImgUrl) && (!comicsImgManager.CheckImageUrl(comicsImg.ImgUrl)))
             {//not duplicate image
 
                 lock (comicsImg)
@@ -137,21 +138,27 @@ namespace GoComics
 
         private static string ScrubbedHtml(Task<string> task)
         {
+            string scrubbedHtml = string.Empty;
             string htmlContent = task.Result;
             //int startIndex = htmlContent.IndexOf("<div class='comic__container'>");
             //int endIndex = htmlContent.IndexOf("<div class='comic__nav'>");
 
+            try
+            {
+                int startIndex = htmlContent.IndexOf("<picture class=\"item-comic-image\">");
+                int endIndex = htmlContent.IndexOf("</picture>", startIndex);
 
-            int startIndex = htmlContent.IndexOf("<picture class=\"item-comic-image\">");
-            int endIndex = htmlContent.IndexOf("</picture>", startIndex);
+                if (startIndex > 0 && endIndex > 0 && endIndex > startIndex)
+                {
+                    int _len = endIndex - startIndex;
+                    scrubbedHtml = task.Result.Substring(startIndex, _len);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
-            int _len = endIndex - startIndex;
-            string scrubbedHtml = task.Result.Substring(startIndex, _len);
-
-            //startIndex = scrubbedHtml.IndexOf("<a");
-            //endIndex = scrubbedHtml.IndexOf("</a>");
-            //_len = endIndex - startIndex;
-            //scrubbedHtml = scrubbedHtml.Substring(startIndex, _len);
             return scrubbedHtml;
         }
 
