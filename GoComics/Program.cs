@@ -235,7 +235,7 @@ namespace GoComics
             return false;
         }
 
-        public static Uri FetchLinksFromSource(string htmlSource)
+        private static Uri FetchLinksFromSource(string htmlSource)
         {
             string regexImgSrc = @"<img[^>]*?src\s*=\s*[""']?([^'"" >]+?)[ '""][^>]*?>";
             MatchCollection matchesImgSrc = Regex.Matches(htmlSource, regexImgSrc, RegexOptions.IgnoreCase | RegexOptions.Singleline);
@@ -248,7 +248,7 @@ namespace GoComics
         }
 
         // Define other methods and classes here
-        public static Task<string> MakeAsyncRequest(string url, string contentType)
+        private static Task<string> MakeAsyncRequest(string url, string contentType)
         {
             try
             {
@@ -261,7 +261,8 @@ namespace GoComics
                 Task<WebResponse> task = Task.Factory.FromAsync(
                     request.BeginGetResponse,
                     asyncResult => request.EndGetResponse(asyncResult),
-                    (object)null);
+                    (object)null
+                    );
 
                 return task.ContinueWith(t => ReadStreamFromResponse(t.Result));
             }

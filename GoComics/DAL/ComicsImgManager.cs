@@ -26,14 +26,14 @@ namespace GoComics.DAL
 
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(ComicsImgSP.SelectComicsImgs.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(ComicsImgSP.SelectComicsImgs.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("IdImg", idImg));
-                        command.Parameters.Add(database.CreateParameter("ComicId", comicId));
-                        command.Parameters.Add(database.CreateParameter("forDate", forDate));
+                        command.Parameters.Add(Database.CreateParameter("IdImg", idImg));
+                        command.Parameters.Add(Database.CreateParameter("ComicId", comicId));
+                        command.Parameters.Add(Database.CreateParameter("forDate", forDate));
 
                         using (IDataReader reader = command.ExecuteReader())
                         {
@@ -70,12 +70,12 @@ namespace GoComics.DAL
             List<ComicsImg> list = new List<ComicsImg>();
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(ComicsImgSP.GetImageUrl.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(ComicsImgSP.GetImageUrl.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("ImgU", imageUrl));
+                        command.Parameters.Add(Database.CreateParameter("ImgU", imageUrl));
 
                         using (IDataReader reader = command.ExecuteReader())
                         {
@@ -113,18 +113,18 @@ namespace GoComics.DAL
             bool retVal = false;
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(ComicsImgSP.InsertComicsImgs.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(ComicsImgSP.InsertComicsImgs.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("@JID", comicsImg.JobId));
-                        command.Parameters.Add(database.CreateParameter("@CId", comicsImg.ComicId));
-                        command.Parameters.Add(database.CreateParameter("@ImgU", comicsImg.ImgUrl));
-                        command.Parameters.Add(database.CreateParameter("@imgPath", comicsImg.ImagePath));
-                        command.Parameters.Add(database.CreateParameter("@ComicU", comicsImg.ComicUrl));
-                        command.Parameters.Add(database.CreateParameter("@forD", comicsImg.ForDate));
-                        command.Parameters.Add(database.CreateParameter("@V", comicsImg.Visited));
+                        command.Parameters.Add(Database.CreateParameter("@JID", comicsImg.JobId));
+                        command.Parameters.Add(Database.CreateParameter("@CId", comicsImg.ComicId));
+                        command.Parameters.Add(Database.CreateParameter("@ImgU", comicsImg.ImgUrl));
+                        command.Parameters.Add(Database.CreateParameter("@imgPath", comicsImg.ImagePath));
+                        command.Parameters.Add(Database.CreateParameter("@ComicU", comicsImg.ComicUrl));
+                        command.Parameters.Add(Database.CreateParameter("@forD", comicsImg.ForDate));
+                        command.Parameters.Add(Database.CreateParameter("@V", comicsImg.Visited));
 
                         retVal = (command.ExecuteNonQuery() > 0);
                     }
@@ -143,19 +143,19 @@ namespace GoComics.DAL
             bool retVal = false;
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(ComicsImgSP.UpdateComicsImgs.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(ComicsImgSP.UpdateComicsImgs.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("@IdImg", comicsImg.IdImg));
-                        command.Parameters.Add(database.CreateParameter("@JobID", comicsImg.JobId));
-                        command.Parameters.Add(database.CreateParameter("@ComicId", comicsImg.ComicId));
-                        command.Parameters.Add(database.CreateParameter("@ImgUrl", comicsImg.ImgUrl));
-                        command.Parameters.Add(database.CreateParameter("@imagePath", comicsImg.ImagePath));
-                        command.Parameters.Add(database.CreateParameter("@ComicUrl", comicsImg.ComicUrl));
-                        command.Parameters.Add(database.CreateParameter("@forDate", comicsImg.ForDate));
-                        command.Parameters.Add(database.CreateParameter("@Visited", comicsImg.Visited));
+                        command.Parameters.Add(Database.CreateParameter("@IdImg", comicsImg.IdImg));
+                        command.Parameters.Add(Database.CreateParameter("@JobID", comicsImg.JobId));
+                        command.Parameters.Add(Database.CreateParameter("@ComicId", comicsImg.ComicId));
+                        command.Parameters.Add(Database.CreateParameter("@ImgUrl", comicsImg.ImgUrl));
+                        command.Parameters.Add(Database.CreateParameter("@imagePath", comicsImg.ImagePath));
+                        command.Parameters.Add(Database.CreateParameter("@ComicUrl", comicsImg.ComicUrl));
+                        command.Parameters.Add(Database.CreateParameter("@forDate", comicsImg.ForDate));
+                        command.Parameters.Add(Database.CreateParameter("@Visited", comicsImg.Visited));
 
                         retVal = (command.ExecuteNonQuery() > 0);
                     }
@@ -174,12 +174,12 @@ namespace GoComics.DAL
             bool retVal = false;
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(ComicsImgSP.UpdateComicsImgs.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(ComicsImgSP.UpdateComicsImgs.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("@IdImg", IdImg));
+                        command.Parameters.Add(Database.CreateParameter("@IdImg", IdImg));
 
                         retVal = (command.ExecuteNonQuery() > 0);
                     }

@@ -23,12 +23,12 @@ namespace GoComics.DAL
 
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(ComicsJobSP.GetComicsForDay.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(ComicsJobSP.GetComicsForDay.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("forDay", forDate));
+                        command.Parameters.Add(Database.CreateParameter("forDay", forDate));
 
                         using (IDataReader reader = command.ExecuteReader())
                         {

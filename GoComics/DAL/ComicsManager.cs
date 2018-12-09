@@ -23,12 +23,12 @@ namespace GoComics.DAL
 
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(ComicsSP.SelectComics.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(ComicsSP.SelectComics.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("idC", idComic));
+                        command.Parameters.Add(Database.CreateParameter("idC", idComic));
 
                         using (IDataReader reader = command.ExecuteReader())
                         {
@@ -63,14 +63,14 @@ namespace GoComics.DAL
             bool retVal = false;
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(ComicsSP.InsertComic.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(ComicsSP.InsertComic.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("@urlC", comics.UrlComic));
-                        command.Parameters.Add(database.CreateParameter("@n", comics.Title));
-                        command.Parameters.Add(database.CreateParameter("@D", comics.Description));
+                        command.Parameters.Add(Database.CreateParameter("@urlC", comics.UrlComic));
+                        command.Parameters.Add(Database.CreateParameter("@n", comics.Title));
+                        command.Parameters.Add(Database.CreateParameter("@D", comics.Description));
 
                         retVal = (command.ExecuteNonQuery() > 0);
                     }
@@ -90,15 +90,15 @@ namespace GoComics.DAL
             bool retVal = false;
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(ComicsSP.UpdateComic.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(ComicsSP.UpdateComic.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("@IdC", comics.IdComic));
-                        command.Parameters.Add(database.CreateParameter("@url", comics.UrlComic));
-                        command.Parameters.Add(database.CreateParameter("@N", comics.Title));
-                        command.Parameters.Add(database.CreateParameter("@D", comics.Description));
+                        command.Parameters.Add(Database.CreateParameter("@IdC", comics.IdComic));
+                        command.Parameters.Add(Database.CreateParameter("@url", comics.UrlComic));
+                        command.Parameters.Add(Database.CreateParameter("@N", comics.Title));
+                        command.Parameters.Add(Database.CreateParameter("@D", comics.Description));
 
                         retVal = (command.ExecuteNonQuery() > 0);
                     }
@@ -118,12 +118,12 @@ namespace GoComics.DAL
             bool retVal = false;
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(ComicsSP.DeleteComic.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(ComicsSP.DeleteComic.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("@IdC", comics.IdComic));
+                        command.Parameters.Add(Database.CreateParameter("@IdC", comics.IdComic));
 
                         retVal = (command.ExecuteNonQuery() > 0);
                     }

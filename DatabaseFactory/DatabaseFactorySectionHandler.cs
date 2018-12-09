@@ -9,7 +9,7 @@ namespace DatabaseFactory
         public string Name => (string)base["Name"];
 
         [ConfigurationProperty("ConnectionStringName")]
-        public string ConnectionStringName => (string)base["ConnectionStringName"];
+        private string ConnectionStringName => (string)base["ConnectionStringName"];
 
         public string ConnectionString
         {

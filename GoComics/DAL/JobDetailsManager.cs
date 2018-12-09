@@ -25,12 +25,12 @@ namespace GoComics.DAL
 
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(JobDetailsSP.SelectJob.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(JobDetailsSP.SelectJob.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("@IdJob", jobId));
+                        command.Parameters.Add(Database.CreateParameter("@IdJob", jobId));
 
                         using (IDataReader reader = command.ExecuteReader())
                         {
@@ -64,14 +64,14 @@ namespace GoComics.DAL
             bool retVal = false;
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(JobDetailsSP.InsertJob.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(JobDetailsSP.InsertJob.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("jId", jobDetails.JobId));
-                        command.Parameters.Add(database.CreateParameter("@StartD", jobDetails.StartTime));
-                        command.Parameters.Add(database.CreateParameter("@EndD", jobDetails.EndTime));
+                        command.Parameters.Add(Database.CreateParameter("jId", jobDetails.JobId));
+                        command.Parameters.Add(Database.CreateParameter("@StartD", jobDetails.StartTime));
+                        command.Parameters.Add(Database.CreateParameter("@EndD", jobDetails.EndTime));
 
                         retVal = (command.ExecuteNonQuery() > 0);
                     }
@@ -90,14 +90,14 @@ namespace GoComics.DAL
             bool retVal = false;
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(JobDetailsSP.UpdateJob.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(JobDetailsSP.UpdateJob.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("jId", jobDetails.JobId));
-                        command.Parameters.Add(database.CreateParameter("@StartD", jobDetails.StartTime));
-                        command.Parameters.Add(database.CreateParameter("@EndD", jobDetails.EndTime));
+                        command.Parameters.Add(Database.CreateParameter("jId", jobDetails.JobId));
+                        command.Parameters.Add(Database.CreateParameter("@StartD", jobDetails.StartTime));
+                        command.Parameters.Add(Database.CreateParameter("@EndD", jobDetails.EndTime));
 
                         command.ExecuteNonQuery();
                         retVal = true;
@@ -118,12 +118,12 @@ namespace GoComics.DAL
             bool retVal = false;
             try
             {
-                using (IDbConnection dbConnect = database.CreateOpenConnection())
+                using (IDbConnection dbConnect = Database.CreateOpenConnection())
                 {
                     using (IDbCommand command =
-                        database.CreateStoredProcCommand(JobDetailsSP.DeleteJob.ToString(), dbConnect))
+                        Database.CreateStoredProcCommand(JobDetailsSP.DeleteJob.ToString(), dbConnect))
                     {
-                        command.Parameters.Add(database.CreateParameter("IdJob", IdJob));
+                        command.Parameters.Add(Database.CreateParameter("IdJob", IdJob));
 
                         retVal = (command.ExecuteNonQuery() > 0);
                     }
